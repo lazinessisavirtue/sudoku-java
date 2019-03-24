@@ -3,11 +3,11 @@ package lazi.sudoku.puzzlegenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-import lazi.sudoku.BoardPossibilities;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
 import lazi.sudoku.Puzzle;
 import lazi.sudoku.SudokuUtil;
+import lazi.sudoku.board.Board;
 import lazi.sudoku.deducer.Deducer;
 
 public class DeducerPuzzleGenerator extends PuzzleGenerator {
@@ -19,9 +19,9 @@ public class DeducerPuzzleGenerator extends PuzzleGenerator {
     }
     
     @Override
-    public Puzzle generate(BoardPossibilities solvedBoard) {
-        BoardPossibilities prev = solvedBoard;
-        BoardPossibilities next = step(prev).noGuess();
+    public Puzzle generate(Board solvedBoard) {
+        Board prev = solvedBoard;
+        Board next = step(prev).noGuess();
         while (!prev.equals(next)) {
             prev = next;
             next = step(prev);
@@ -29,14 +29,14 @@ public class DeducerPuzzleGenerator extends PuzzleGenerator {
         return new Puzzle(solvedBoard, next);
     }
     
-    private BoardPossibilities step(BoardPossibilities board) {
+    private Board step(Board board) {
         List<Position> canHide = new ArrayList<>();
         for (Position p : PositionLists.all()) {
             if (!board.getSquare(p).containsExactlyOne()) {
                 continue;
             }
-            BoardPossibilities hiddenBoard = board.hideSquare(p);
-            BoardPossibilities deducedBoard = deducer.deduceUntilStableOrCondition(
+            Board hiddenBoard = board.hideSquare(p);
+            Board deducedBoard = deducer.deduceUntilStableOrCondition(
                     hiddenBoard,
                     (prev, next) -> next.getSquare(p).containsExactlyOne());;
             if (deducedBoard.getSquare(p).containsExactlyOne()) {

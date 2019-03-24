@@ -1,12 +1,12 @@
 package lazi.sudoku;
 
-public class SquarePossibilities {
+public class PossibleValues {
     
     private final int possibilities;
     private final int size;
     private final int smallest;
     
-    private SquarePossibilities(int possibilities) {
+    private PossibleValues(int possibilities) {
         this.possibilities = possibilities;
         int size = 0;
         int smallest = 0;
@@ -39,40 +39,40 @@ public class SquarePossibilities {
         return (possibilities & (1 << value)) != 0;
     }
     
-    public SquarePossibilities and(SquarePossibilities other) {
-        return SquarePossibilities.of(possibilities & other.possibilities);
+    public PossibleValues and(PossibleValues other) {
+        return PossibleValues.of(possibilities & other.possibilities);
     }
-    public SquarePossibilities or(SquarePossibilities other) {
-        return SquarePossibilities.of(possibilities | other.possibilities);
+    public PossibleValues or(PossibleValues other) {
+        return PossibleValues.of(possibilities | other.possibilities);
     }
-    public SquarePossibilities substract(SquarePossibilities other) {
-        return SquarePossibilities.of(possibilities & ~other.possibilities);
+    public PossibleValues substract(PossibleValues other) {
+        return PossibleValues.of(possibilities & ~other.possibilities);
     }
-    public SquarePossibilities add(int value) {
+    public PossibleValues add(int value) {
         SudokuUtil.validateValue(value);
-        return SquarePossibilities.of(possibilities | (1 << value));
+        return PossibleValues.of(possibilities | (1 << value));
     }
-    public SquarePossibilities remove(int value) {
+    public PossibleValues remove(int value) {
         SudokuUtil.validateValue(value);
-        return SquarePossibilities.of(possibilities & ~(1 << value));
+        return PossibleValues.of(possibilities & ~(1 << value));
     }
     
-    private static final SquarePossibilities[] ALL = new SquarePossibilities[1 << 9];
+    private static final PossibleValues[] ALL = new PossibleValues[1 << 9];
     static {
         for (int i = 0; i < 1 << 9; i++) {
-            ALL[i] = new SquarePossibilities(i << 1);
+            ALL[i] = new PossibleValues(i << 1);
         }
     }
-    private static SquarePossibilities of(int possibilities) {
+    private static PossibleValues of(int possibilities) {
         return ALL[possibilities >> 1];
     }
     
-    public static final SquarePossibilities EMPTY = SquarePossibilities.of(0);
-    public static final SquarePossibilities FULL = SquarePossibilities.of((1 << 10) - 2);
+    public static final PossibleValues EMPTY = PossibleValues.of(0);
+    public static final PossibleValues FULL = PossibleValues.of((1 << 10) - 2);
     
-    public static SquarePossibilities only(int value) {
+    public static PossibleValues only(int value) {
         SudokuUtil.validateValue(value);
-        return SquarePossibilities.of(1 << value);
+        return PossibleValues.of(1 << value);
     }
     
 }

@@ -2,32 +2,32 @@ package lazi.sudoku.deducer;
 
 import java.util.List;
 
-import lazi.sudoku.BoardPossibilities;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
-import lazi.sudoku.SquarePossibilities;
+import lazi.sudoku.PossibleValues;
+import lazi.sudoku.board.Board;
 
 public class OnlySquareForAValueDeducer extends Deducer {
     
     @Override
-    public BoardPossibilities deduce(BoardPossibilities board) {
-        SquarePossibilities[][] squares = board.getSquaresCopy();
+    public Board deduce(Board board) {
+        PossibleValues[][] squares = board.getSquaresCopy();
         for (List<Position> group : PositionLists.groups()) {
-            SquarePossibilities seenOne = SquarePossibilities.EMPTY;
-            SquarePossibilities seenTwoPlus = SquarePossibilities.EMPTY;
+            PossibleValues seenOne = PossibleValues.EMPTY;
+            PossibleValues seenTwoPlus = PossibleValues.EMPTY;
             for (Position p : group) {
                 seenTwoPlus = seenTwoPlus.or(seenOne.and(board.getSquare(p)));
                 seenOne = seenOne.or(board.getSquare(p));
                 
             }
-            SquarePossibilities seenExactlyOne = seenOne.substract(seenTwoPlus);
+            PossibleValues seenExactlyOne = seenOne.substract(seenTwoPlus);
             for (Position p : group) {
-                if (board.getSquare(p).and(seenExactlyOne) != SquarePossibilities.EMPTY) {
+                if (board.getSquare(p).and(seenExactlyOne) != PossibleValues.EMPTY) {
                     squares[p.getRow()][p.getCol()] = board.getSquare(p).and(seenExactlyOne);
                 }
             }
         }
-        return new BoardPossibilities(squares);
+        return new Board(squares);
     }
     
 }

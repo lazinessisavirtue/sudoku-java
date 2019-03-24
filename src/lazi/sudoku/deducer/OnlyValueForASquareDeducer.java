@@ -2,18 +2,18 @@ package lazi.sudoku.deducer;
 
 import java.util.List;
 
-import lazi.sudoku.BoardPossibilities;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
-import lazi.sudoku.SquarePossibilities;
+import lazi.sudoku.PossibleValues;
+import lazi.sudoku.board.Board;
 
 public class OnlyValueForASquareDeducer extends Deducer {
     
     @Override
-    public BoardPossibilities deduce(BoardPossibilities board) {
-        SquarePossibilities[][] squares = board.getSquaresCopy();
+    public Board deduce(Board board) {
+        PossibleValues[][] squares = board.getSquaresCopy();
         for (List<Position> group : PositionLists.groups()) {
-            SquarePossibilities solvedOnes = SquarePossibilities.EMPTY;
+            PossibleValues solvedOnes = PossibleValues.EMPTY;
             for (Position p : group) {
                 if (board.getSquare(p).containsExactlyOne()) {
                     solvedOnes = solvedOnes.or(board.getSquare(p));
@@ -25,7 +25,7 @@ public class OnlyValueForASquareDeducer extends Deducer {
                 }
             }
         }
-        return new BoardPossibilities(squares);
+        return new Board(squares);
     }
     
 }

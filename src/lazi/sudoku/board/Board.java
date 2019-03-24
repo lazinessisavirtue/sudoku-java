@@ -1,20 +1,28 @@
-package lazi.sudoku;
+package lazi.sudoku.board;
 
 import java.util.List;
 
-public class BoardPossibilities {
+import lazi.sudoku.Position;
+import lazi.sudoku.PositionLists;
+import lazi.sudoku.PossibleValues;
+
+public class Board {
     
-    private SquarePossibilities[][] squares = new SquarePossibilities[9][9];
+    PossibleValues[][] squares = new PossibleValues[9][9];
     
-    public BoardPossibilities(SquarePossibilities[][] squares) {
+    public Board(Board board) {
+        this.squares = copySquares(board.squares);
+    }
+    
+    public Board(PossibleValues[][] squares) {
         this.squares = copySquares(squares);
     }
     
-    public SquarePossibilities getSquare(int row, int col) {
+    public PossibleValues getSquare(int row, int col) {
         return squares[row][col];
     }
     
-    public SquarePossibilities getSquare(Position position) {
+    public PossibleValues getSquare(Position position) {
         return squares[position.getRow()][position.getCol()];
     }
     
@@ -22,8 +30,8 @@ public class BoardPossibilities {
     public boolean equals(Object other) {
         if (other == null) return false;
         if (other == this) return true;
-        if (!(other instanceof BoardPossibilities)) return false;
-        BoardPossibilities that = (BoardPossibilities) other;
+        if (!(other instanceof Board)) return false;
+        Board that = (Board) other;
         for (Position p : PositionLists.all()) {
             if (this.getSquare(p) != that.getSquare(p)) {
                 return false;
@@ -39,11 +47,11 @@ public class BoardPossibilities {
             }
         }
         for (List<Position> group : PositionLists.groups()) {
-            SquarePossibilities possibility = SquarePossibilities.EMPTY;
+            PossibleValues possibility = PossibleValues.EMPTY;
             for (Position p : group) {
                 possibility = possibility.or(getSquare(p));
             }
-            if (possibility != SquarePossibilities.FULL) {
+            if (possibility != PossibleValues.FULL) {
                 return false;
             }
         }
@@ -56,80 +64,81 @@ public class BoardPossibilities {
             }
         }
         for (List<Position> group : PositionLists.groups()) {
-            SquarePossibilities possibility = SquarePossibilities.EMPTY;
+            PossibleValues possibility = PossibleValues.EMPTY;
             for (Position p : group) {
                 possibility = possibility.or(getSquare(p));
             }
-            if (possibility != SquarePossibilities.FULL) {
+            if (possibility != PossibleValues.FULL) {
                 return true;
             }
         }
         return false;
     }
     
-    public SquarePossibilities[][] getSquaresCopy() {
+    public PossibleValues[][] getSquaresCopy() {
         return copySquares(squares);
     }
     
-    public BoardPossibilities hideSquare(Position p) {
-        return setSquare(p, SquarePossibilities.FULL);
+    public Board hideSquare(Position p) {
+        //System.out.println("hideSquare: " + p.getRow() + ", "  + p.getCol());
+        return setSquare(p, PossibleValues.FULL);
     }
     
-    public BoardPossibilities setSquare(Position p, SquarePossibilities square) {
-        SquarePossibilities[][] result = getSquaresCopy();
+    public Board setSquare(Position p, PossibleValues square) {
+        PossibleValues[][] result = getSquaresCopy();
         result[p.getRow()][p.getCol()] = square;
-        return new BoardPossibilities(result);
+        return new Board(result);
     }
     
-    public BoardPossibilities noGuess() {
-        SquarePossibilities[][] result = copySquares(squares);
+    public Board noGuess() {
+        PossibleValues[][] result = copySquares(squares);
         for (Position p : PositionLists.all()) {
             if (!getSquare(p).containsExactlyOne()) {
-                result[p.getRow()][p.getRow()] = SquarePossibilities.FULL;
+                result[p.getRow()][p.getCol()] = PossibleValues.FULL;
             }
         }
-        return new BoardPossibilities(result);
+        return new Board(result);
     }
     
-    public BoardPossibilities and(BoardPossibilities other) {
-        SquarePossibilities[][] result = createNullSquares();
+    public Board and(Board other) {
+        PossibleValues[][] result = createNullSquares();
         for (Position p : PositionLists.all()) {
             result[p.getRow()][p.getCol()] = getSquare(p).and(other.getSquare(p));
         }
-        return new BoardPossibilities(result);
+        return new Board(result);
     }
     
-    public BoardPossibilities or(BoardPossibilities other) {
-        SquarePossibilities[][] result = createNullSquares();
+    public Board or(Board other) {
+        PossibleValues[][] result = createNullSquares();
         for (Position p : PositionLists.all()) {
             result[p.getRow()][p.getCol()] = getSquare(p).or(other.getSquare(p));
         }
-        return new BoardPossibilities(result);
+        return new Board(result);
     }
     
-    public static SquarePossibilities[][] createNullSquares() {
-        return new SquarePossibilities[9][9];
+    public static PossibleValues[][] createNullSquares() {
+        return new PossibleValues[9][9];
     }
-    public static SquarePossibilities[][] createEmptySquares() {
-        SquarePossibilities[][] result = createNullSquares();
+    public static PossibleValues[][] createEmptySquares() {
+        PossibleValues[][] result = createNullSquares();
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                result[i][j] = SquarePossibilities.EMPTY;
+                result[i][j] = PossibleValues.EMPTY;
             }
         }
         return result;
     }
-    public static SquarePossibilities[][] createFullSquares() {
-        SquarePossibilities[][] result = createNullSquares();
+    public static PossibleValues[][] createFullSquares() {
+        PossibleValues[][] result = createNullSquares();
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
-                result[i][j] = SquarePossibilities.FULL;
+                result[i][j] = PossibleValues.FULL;
             }
         }
         return result;
     }
-    public static SquarePossibilities[][] copySquares(SquarePossibilities[][] source) {
-        SquarePossibilities[][] result = createNullSquares();
+    public static PossibleValues[][] copySquares(PossibleValues[][] source) {
+        PossibleValues[][] result = createNullSquares();
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
                 result[i][j] = source[i][j];

@@ -1,9 +1,9 @@
 package lazi.sudoku.deducer;
 
-import lazi.sudoku.BoardPossibilities;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
-import lazi.sudoku.SquarePossibilities;
+import lazi.sudoku.PossibleValues;
+import lazi.sudoku.board.Board;
 
 public class MultipleValueForASquareDeducer extends Deducer {
     
@@ -17,19 +17,19 @@ public class MultipleValueForASquareDeducer extends Deducer {
     }
 
     @Override
-    public BoardPossibilities deduce(BoardPossibilities board) {
-        BoardPossibilities result = board;
+    public Board deduce(Board board) {
+        Board result = board;
         for (Position p : PositionLists.all()) {
             if (board.getSquare(p).size() != multiple) {
                 continue;
             }
-            BoardPossibilities or = new BoardPossibilities(BoardPossibilities.createEmptySquares());
-            SquarePossibilities remaining = board.getSquare(p);
+            Board or = new Board(Board.createEmptySquares());
+            PossibleValues remaining = board.getSquare(p);
             while (!remaining.isEmpty()) {
                 int value = remaining.smallest();
                 remaining = remaining.remove(value);
-                BoardPossibilities hypothesis = checkHypothesis(
-                        board.setSquare(p, SquarePossibilities.only(value)));
+                Board hypothesis = checkHypothesis(
+                        board.setSquare(p, PossibleValues.only(value)));
                 or = or.or(hypothesis);
             }
             result= result.and(or);
@@ -37,7 +37,7 @@ public class MultipleValueForASquareDeducer extends Deducer {
         return result;
     }
 
-    private BoardPossibilities checkHypothesis(BoardPossibilities board) {
+    private Board checkHypothesis(Board board) {
         for (int i = 0; i < forwardSteps; i ++) {
             board = l1Deducer.deduce(board);
         }

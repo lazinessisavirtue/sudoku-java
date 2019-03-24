@@ -2,15 +2,15 @@ package lazi.sudoku.deducer;
 
 import java.util.function.BiPredicate;
 
-import lazi.sudoku.BoardPossibilities;
+import lazi.sudoku.board.Board;
 
 public abstract class Deducer {
     
-    public abstract BoardPossibilities deduce(BoardPossibilities board);
+    public abstract Board deduce(Board board);
     
-    public BoardPossibilities deduceUntilStable(BoardPossibilities board) {
-        BoardPossibilities prev = board;
-        BoardPossibilities next = deduce(board);
+    public Board deduceUntilStable(Board board) {
+        Board prev = board;
+        Board next = deduce(board);
         while (!prev.equals(next)) {
             //System.out.println("deduceUntilStable");
             prev = next;
@@ -19,11 +19,11 @@ public abstract class Deducer {
         return next;
     }
     
-    public BoardPossibilities deduceUntilStableOrCondition(
-            BoardPossibilities board,
-            BiPredicate<BoardPossibilities, BoardPossibilities> condition) {
-        BoardPossibilities prev = board;
-        BoardPossibilities next = deduce(board);
+    public Board deduceUntilStableOrCondition(
+            Board board,
+            BiPredicate<Board, Board> condition) {
+        Board prev = board;
+        Board next = deduce(board);
         while (!prev.equals(next) && !condition.test(prev, next)) {
             //System.out.println("deduceUntilStable");
             prev = next;

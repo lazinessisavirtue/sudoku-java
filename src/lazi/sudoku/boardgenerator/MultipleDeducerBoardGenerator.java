@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import lazi.sudoku.BoardPossibilities;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
-import lazi.sudoku.SquarePossibilities;
+import lazi.sudoku.PossibleValues;
 import lazi.sudoku.SudokuUtil;
+import lazi.sudoku.board.Board;
 import lazi.sudoku.deducer.Deducer;
 
 public class MultipleDeducerBoardGenerator extends BoardGenerator {
@@ -19,10 +19,10 @@ public class MultipleDeducerBoardGenerator extends BoardGenerator {
         this.deducers = Arrays.copyOf(deducers, deducers.length);
     }
     
-    protected BoardPossibilities tryGenerate() {
-        SquarePossibilities[][] squares = BoardPossibilities.createFullSquares();
+    protected Board tryGenerate() {
+        PossibleValues[][] squares = Board.createFullSquares();
         insertSeeds(squares);
-        BoardPossibilities board = new BoardPossibilities(squares);
+        Board board = new Board(squares);
         board = deduceUntilStable(board);
         while (!board.isSolution() && !board.isContradiction()) {
             board = makeRandomGuess(board);
@@ -31,25 +31,25 @@ public class MultipleDeducerBoardGenerator extends BoardGenerator {
         return board;
     }
 
-    private void insertSeeds(SquarePossibilities[][] squares) {
+    private void insertSeeds(PossibleValues[][] squares) {
         int[] random9;
         random9 = SudokuUtil.shuffledValues();
         for (int i = 0; i < 9; i++) {
-            squares[i % 3][i / 3] = SquarePossibilities.only(random9[i]);
+            squares[i % 3][i / 3] = PossibleValues.only(random9[i]);
         }
         random9 = SudokuUtil.shuffledValues();
         for (int i = 0; i < 9; i++) {
-            squares[i % 3 + 3][i / 3 + 3] = SquarePossibilities.only(random9[i]);
+            squares[i % 3 + 3][i / 3 + 3] = PossibleValues.only(random9[i]);
         }
         random9 = SudokuUtil.shuffledValues();
         for (int i = 0; i < 9; i++) {
-            squares[i % 3 + 6][i / 3 + 6] = SquarePossibilities.only(random9[i]);
+            squares[i % 3 + 6][i / 3 + 6] = PossibleValues.only(random9[i]);
         }
     }
     
-    private BoardPossibilities deduceUntilStable(BoardPossibilities board) {
-        BoardPossibilities prev = board;
-        BoardPossibilities next = prev;
+    private Board deduceUntilStable(Board board) {
+        Board prev = board;
+        Board next = prev;
         for (int i = 0; i < deducers.length; ) {
             prev = next;
             next = deducers[i].deduce(prev);
@@ -62,7 +62,7 @@ public class MultipleDeducerBoardGenerator extends BoardGenerator {
         return next;
     }
     
-    private BoardPossibilities makeRandomGuess(BoardPossibilities board) {
+    private Board makeRandomGuess(Board board) {
         List<List<Position>> positionsByNumberOfPossibilities = new ArrayList<>();
         for (int i = 0; i <= 9; i++) {
             positionsByNumberOfPossibilities.add(new ArrayList<>());
@@ -78,13 +78,13 @@ public class MultipleDeducerBoardGenerator extends BoardGenerator {
                 continue;
             }
             Position p = SudokuUtil.randomElement(positionsByNumberOfPossibilities.get(i));
-            SquarePossibilities square = board.getSquare(p);
-            SquarePossibilities[][] squares = board.getSquaresCopy();
+            PossibleValues square = board.getSquare(p);
+            PossibleValues[][] squares = board.getSquaresCopy();
             int[] random9 = SudokuUtil.shuffledValues();
             for (int j = 0; j < 9; j++) {
                 if(square.contains(random9[j])) {
-                    squares[p.getRow()][p.getCol()] = SquarePossibilities.only(random9[j]);
-                    return new BoardPossibilities(squares);
+                    squares[p.getRow()][p.getCol()] = PossibleValues.only(random9[j]);
+                    return new Board(squares);
                 }
             }
         }
