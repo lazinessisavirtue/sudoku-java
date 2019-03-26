@@ -6,7 +6,8 @@ import java.util.List;
 import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
 import lazi.sudoku.PossibleValues;
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
+import lazi.sudoku.board.MutableBoard;
 
 public class MultipleSquareForAValueDeducer extends Deducer {
     
@@ -20,8 +21,8 @@ public class MultipleSquareForAValueDeducer extends Deducer {
     }
     
     @Override
-    public Board deduce(Board board) {
-        Board result = board;
+    public boolean deduce(MutableBoard board) {
+        ImmutableBoard before = board.createImmutableCopy();
         for (int i = 1; i < 9; i++) {
             for (List<Position> group : PositionLists.groups()) {
                 List<Position> ps = new ArrayList<>();
@@ -33,24 +34,23 @@ public class MultipleSquareForAValueDeducer extends Deducer {
                 if (ps.size() != multiple) {
                     continue;
                 }
-                
-                Board or = new Board(Board.createEmptySquares());
+                MutableBoard or = MutableBoard.empty();
                 for (Position p : ps) {
-                    Board hypothesis = checkHypothesis(
-                            board.setSquare(p, PossibleValues.only(i)));
-                    or = or.or(hypothesis);
+                    MutableBoard hypothesis = board.createMutableCopy();
+                    hypothesis.setSquare(p, PossibleValues.only(i));
+                    checkHypothesis(hypothesis);
+                    or.or(hypothesis);
                 }
-                result= result.and(or);
+                board.and(or);
             }
         }
-        return result;
+        return !board.matches(before);
     }
 
-    private Board checkHypothesis(Board board) {
+    private void checkHypothesis(MutableBoard board) {
         for (int i = 0; i < forwardSteps; i ++) {
-            board = l1Deducer.deduce(board);
+            l1Deducer.deduce(board);
         }
-        return board;
     }
     
 }

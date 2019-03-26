@@ -1,22 +1,22 @@
 package lazi.sudoku;
 
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
 
 public class Puzzle {
     
-    private final Board solvedBoard;
-    private final Board hiddenBoard;
+    private final ImmutableBoard solvedBoard;
+    private final ImmutableBoard hiddenBoard;
     
-    public Puzzle(Board solvedBoard, Board hiddenBoard) {
+    public Puzzle(ImmutableBoard solvedBoard, ImmutableBoard hiddenBoard) {
         super();
         this.solvedBoard = solvedBoard;
         this.hiddenBoard = hiddenBoard;
     }
     
-    public Board getSolvedBoard() {
+    public ImmutableBoard getSolvedBoard() {
         return solvedBoard;
     }
-    public Board getHiddenBoard() {
+    public ImmutableBoard getHiddenBoard() {
         return hiddenBoard;
     }
     

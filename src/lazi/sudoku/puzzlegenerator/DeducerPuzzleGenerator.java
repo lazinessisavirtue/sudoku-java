@@ -7,7 +7,8 @@ import lazi.sudoku.Position;
 import lazi.sudoku.PositionLists;
 import lazi.sudoku.Puzzle;
 import lazi.sudoku.SudokuUtil;
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
+import lazi.sudoku.board.MutableBoard;
 import lazi.sudoku.deducer.Deducer;
 
 public class DeducerPuzzleGenerator extends PuzzleGenerator {
@@ -19,31 +20,30 @@ public class DeducerPuzzleGenerator extends PuzzleGenerator {
     }
     
     @Override
-    public Puzzle generate(Board solvedBoard) {
-        Board prev = solvedBoard;
-        Board next = step(prev).noGuess();
-        while (!prev.equals(next)) {
-            prev = next;
-            next = step(prev);
-        }
-        return new Puzzle(solvedBoard, next);
+    public Puzzle generate(ImmutableBoard solvedBoard) {
+        MutableBoard board = solvedBoard.createMutableCopy();
+        while (step(board));
+        return new Puzzle(solvedBoard, board.createImmutableCopy());
     }
     
-    private Board step(Board board) {
+    private boolean step(MutableBoard board) {
         List<Position> canHide = new ArrayList<>();
         for (Position p : PositionLists.all()) {
             if (!board.getSquare(p).containsExactlyOne()) {
                 continue;
             }
-            Board hiddenBoard = board.hideSquare(p);
-            Board deducedBoard = deducer.deduceUntilStableOrCondition(
-                    hiddenBoard,
-                    (prev, next) -> next.getSquare(p).containsExactlyOne());;
+            MutableBoard deducedBoard = board.createMutableCopy();
+            deducedBoard.hideSquare(p);
+            while (!deducedBoard.getSquare(p).containsExactlyOne() && deducer.deduce(board));
             if (deducedBoard.getSquare(p).containsExactlyOne()) {
                 canHide.add(p);
             }
         }
-        return canHide.isEmpty() ? board : board.hideSquare(SudokuUtil.randomElement(canHide));
+        if (!canHide.isEmpty()) {
+            board.hideSquare(SudokuUtil.randomElement(canHide));
+            return true;
+        }
+        return false;
     }
     
 }

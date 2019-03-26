@@ -1,6 +1,6 @@
 package lazi.sudoku;
 
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
 import lazi.sudoku.boardgenerator.BoardGenerator;
 import lazi.sudoku.boardgenerator.L1BoardGenerator;
 import lazi.sudoku.boardgenerator.MultipleDeducerBoardGenerator;
@@ -15,12 +15,12 @@ import lazi.sudoku.puzzlegenerator.MultiDeducerPuzzleGenerator;
 
 /*
     TODOs:
-    - for Board.squares, use 1d array instead of 2d
-    - for Board, break down to ImmutableBoard vs MutableBoard
     - for Puzzle, add metadata
     - for MultiDeducerPuzzleGenerator, store max deducer in puzzle metadata
     - for Main, add generateHardPuzzle that retry until max deducer is high
     - add cascading deducers
+    - add solver
+    - add solver puzzle generator
 */
 public class Main {
     
@@ -30,8 +30,8 @@ public class Main {
         generatePuzzle();
     }
     
-    public static Board generateSolvedBoard() {
-        Board board = new L1BoardGenerator().generate();
+    public static ImmutableBoard generateSolvedBoard() {
+        ImmutableBoard board = new L1BoardGenerator().generate();
         BoardPossibilitiesPrinter.print(board);
         BoardPrinter.print(board);
         return board;
@@ -52,7 +52,7 @@ public class Main {
         long startTime = System.currentTimeMillis();
         
         //BoardPossibilities solvedBoard = new L1BoardGenerator().generate();
-        Board solvedBoard = new MultipleDeducerBoardGenerator(new Deducer[] {
+        ImmutableBoard solvedBoard = new MultipleDeducerBoardGenerator(new Deducer[] {
                 new OnlyValueForASquareDeducer(),
                 new OnlySquareForAValueDeducer(),
                 new MultipleValueForASquareDeducer(2, 4),

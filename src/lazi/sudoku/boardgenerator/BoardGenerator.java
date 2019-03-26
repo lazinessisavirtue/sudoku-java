@@ -1,11 +1,11 @@
 package lazi.sudoku.boardgenerator;
 
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
 
 public abstract class BoardGenerator {
 
-    public Board generate() {
-        Board board = tryGenerate();
+    public ImmutableBoard generate() {
+        ImmutableBoard board = tryGenerate();
         while (!board.isSolution()) {
             board = tryGenerate();
         }
@@ -16,7 +16,7 @@ public abstract class BoardGenerator {
         System.out.println("testSolutionGeneratorSuccessRate");
         int solution = 0, contradiction = 0;
         for (int i = 0; i < attempts; i++) {
-            Board board = tryGenerate();
+            ImmutableBoard board = tryGenerate();
             if (board.isSolution()) {
                 solution++;
             }
@@ -28,6 +28,6 @@ public abstract class BoardGenerator {
         System.out.println("contradiction = " +  contradiction);
     }
     
-    protected abstract Board tryGenerate();
+    protected abstract ImmutableBoard tryGenerate();
     
 }

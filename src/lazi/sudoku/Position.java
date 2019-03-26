@@ -28,15 +28,12 @@ public class Position {
         return index;
     }
     
-    //private static Position[] POSITIONS = createPositions();
     private static Position[] POSITIONS;
-    //private static Position[] createPositions() {
     static {
         Position[] positions = new Position[9 * 9];
         for (int index = 0; index < 9 * 9; index++) {
             positions[index] = new Position(index);
         }
-        //return positions;
         POSITIONS = positions;
     }
     public static Position of(int index) {

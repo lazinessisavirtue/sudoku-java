@@ -1,14 +1,15 @@
 package lazi.sudoku.printer;
 
+import lazi.sudoku.Position;
 import lazi.sudoku.PossibleValues;
-import lazi.sudoku.board.Board;
+import lazi.sudoku.board.ImmutableBoard;
 
 public class BoardPossibilitiesPrinter {
     
     private static final int NUM_ROW_PER_SQUARE = 3;
     private static final int NUM_COL_PER_SQUARE = 3;
     
-    public static void print(Board board) {
+    public static void print(ImmutableBoard board) {
         for (int row = 0; row < 9; row++) {
             if (row % 3 == 0) {
                 printBarLine();
@@ -40,14 +41,14 @@ public class BoardPossibilitiesPrinter {
         System.out.println('|');
     }
     private static void printValueLine(
-            Board board,
+            ImmutableBoard board,
             int row,
             int subRow) {
         for (int col = 0; col < 9; col++) {
             System.out.print(col % 3 == 0 ? '|' : ' ');
             for (int j = 0; j < NUM_COL_PER_SQUARE; j++) {
                 int value = 1 + subRow * NUM_COL_PER_SQUARE + j;
-                printValue(board.getSquare(row, col), value);
+                printValue(board.getSquare(Position.of(row, col)), value);
             }
         }
         System.out.println('|');
