@@ -20,6 +20,11 @@ import lazi.sudoku.puzzlegenerator.MultiDeducerPuzzleGenerator;
     - add solver
     - add solver puzzle generator
 */
+/*
+    References:
+    - http://www.sudokuwiki.org/strategy_families
+    - https://www.stolaf.edu//people/hansonr/sudoku/analyst.htm
+*/
 public class Main {
     
     public static void main(String[] args) {
@@ -104,8 +109,28 @@ public class Main {
         Puzzle puzzle = new MultiDeducerPuzzleGenerator(new Deducer[] {
                 new OnlyValueForASquareDeducer(),
                 new OnlySquareForAValueDeducer(),
+                new MultipleValueForASquareDeducer(2, 1),
+                new MultipleSquareForAValueDeducer(2, 1),
+                new MultipleValueForASquareDeducer(2, 2),
+                new MultipleSquareForAValueDeducer(2, 2),
+                new MultipleValueForASquareDeducer(2, 3),
+                new MultipleSquareForAValueDeducer(2, 3),
                 new MultipleValueForASquareDeducer(2, 4),
                 new MultipleSquareForAValueDeducer(2, 4),
+                new MultipleValueForASquareDeducer(2, 5),
+                new MultipleSquareForAValueDeducer(2, 5),
+                new MultipleValueForASquareDeducer(2, 6),
+                new MultipleSquareForAValueDeducer(2, 6),
+                new MultipleValueForASquareDeducer(3, 1),
+                new MultipleSquareForAValueDeducer(3, 1),
+                new MultipleValueForASquareDeducer(3, 2),
+                new MultipleSquareForAValueDeducer(3, 2),
+                new MultipleValueForASquareDeducer(3, 3),
+                new MultipleSquareForAValueDeducer(3, 3),
+                new MultipleValueForASquareDeducer(3, 4),
+                new MultipleSquareForAValueDeducer(3, 4),
+                new MultipleValueForASquareDeducer(3, 5),
+                new MultipleSquareForAValueDeducer(3, 5),
                 new MultipleValueForASquareDeducer(3, 6),
                 new MultipleSquareForAValueDeducer(3, 6),
         }).generate(solvedBoard);
@@ -113,6 +138,10 @@ public class Main {
         
         System.out.println("  solvedBoard took " + (solvedBoardTime - startTime) + "ms");
         System.out.println("  puzzle took " + (puzzleTime - solvedBoardTime) + "ms");
+        System.out.println("  squares shown: " + PositionLists.all().stream()
+                .mapToInt(p -> puzzle.getPuzzleBoard().getSquare(p).containsExactlyOne() ? 1 : 0)
+                .sum());
+        System.out.println("  hardness: " + puzzle.getMetadata().hardness);
         return puzzle;
     }
     
@@ -121,7 +150,7 @@ public class Main {
         
         Puzzle puzzle = tryGenerateHardPuzzle();
         int attempt = 1;
-        while (puzzle.getMetadata().hardness < 4) {
+        while (puzzle.getMetadata().hardness < 14) {
             puzzle = tryGenerateHardPuzzle();
             attempt++;
         }
