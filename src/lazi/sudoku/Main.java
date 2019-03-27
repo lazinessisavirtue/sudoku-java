@@ -15,10 +15,8 @@ import lazi.sudoku.puzzlegenerator.MultiDeducerPuzzleGenerator;
 
 /*
     TODOs:
-    - for Puzzle, add metadata
-    - for MultiDeducerPuzzleGenerator, store max deducer in puzzle metadata
-    - for Main, add generateHardPuzzle that retry until max deducer is high
     - add cascading deducers
+    - add chaining deducers
     - add solver
     - add solver puzzle generator
 */
@@ -27,7 +25,8 @@ public class Main {
     public static void main(String[] args) {
         //generateSolvedBoard();
         //testBoardGeneratorSuccessRate();
-        generatePuzzle();
+        //generatePuzzle();
+        generateHardPuzzle();
     }
     
     public static ImmutableBoard generateSolvedBoard() {
@@ -75,18 +74,63 @@ public class Main {
         BoardPrinter.print(puzzle.getSolvedBoard());
         System.out.println("hiddenBoard:");
         //BoardPossibilitiesPrinter.print(puzzle.getHiddenBoard());
-        BoardPrinter.print(puzzle.getHiddenBoard());
+        BoardPrinter.print(puzzle.getPuzzleBoard());
         System.out.println("solvedBoard took " + (solvedBoardTime - startTime) + "ms");
         System.out.println("puzzle took " + (puzzleTime - solvedBoardTime) + "ms");
         
         int shownCount = 0;
         for (Position p : PositionLists.all()) {
-            if (puzzle.getHiddenBoard().getSquare(p).containsExactlyOne()) {
+            if (puzzle.getPuzzleBoard().getSquare(p).containsExactlyOne()) {
                 shownCount++;
             }
         }
         System.out.println("squares shown: " + shownCount);
         System.out.println("squares hidden: " + (81 - shownCount));
+        return puzzle;
+    }
+    
+    private static Puzzle tryGenerateHardPuzzle() {
+        System.out.println("tryGenerateHardPuzzle");
+        long startTime = System.currentTimeMillis();
+        
+        ImmutableBoard solvedBoard = new MultipleDeducerBoardGenerator(new Deducer[] {
+                new OnlyValueForASquareDeducer(),
+                new OnlySquareForAValueDeducer(),
+                new MultipleValueForASquareDeducer(2, 4),
+                new MultipleSquareForAValueDeducer(2, 4),
+        }).generate();
+        long solvedBoardTime = System.currentTimeMillis();
+        
+        Puzzle puzzle = new MultiDeducerPuzzleGenerator(new Deducer[] {
+                new OnlyValueForASquareDeducer(),
+                new OnlySquareForAValueDeducer(),
+                new MultipleValueForASquareDeducer(2, 4),
+                new MultipleSquareForAValueDeducer(2, 4),
+                new MultipleValueForASquareDeducer(3, 6),
+                new MultipleSquareForAValueDeducer(3, 6),
+        }).generate(solvedBoard);
+        long puzzleTime = System.currentTimeMillis();
+        
+        System.out.println("  solvedBoard took " + (solvedBoardTime - startTime) + "ms");
+        System.out.println("  puzzle took " + (puzzleTime - solvedBoardTime) + "ms");
+        return puzzle;
+    }
+    
+    public static Puzzle generateHardPuzzle() {
+        long startTime = System.currentTimeMillis();
+        
+        Puzzle puzzle = tryGenerateHardPuzzle();
+        int attempt = 1;
+        while (puzzle.getMetadata().hardness < 4) {
+            puzzle = tryGenerateHardPuzzle();
+            attempt++;
+        }
+        System.out.println("solvedBoard:");
+        BoardPrinter.print(puzzle.getSolvedBoard());
+        System.out.println("hiddenBoard:");
+        BoardPrinter.print(puzzle.getPuzzleBoard());
+        System.out.println("attempts: " + attempt);
+        System.out.println("total took " + (System.currentTimeMillis() - startTime) + "ms");
         return puzzle;
     }
     

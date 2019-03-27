@@ -19,20 +19,32 @@ import lazi.sudoku.deducer.Deducer;
 public class MultiDeducerPuzzleGenerator extends PuzzleGenerator {
     
     private final Deducer[] deducers;
+    private final boolean verbose;
     
-    public MultiDeducerPuzzleGenerator(Deducer[] deducers) {
+    public MultiDeducerPuzzleGenerator(Deducer[] deducers, boolean verbose) {
         this.deducers = Arrays.copyOf(deducers, deducers.length);
+        this.verbose = verbose;
+    }
+    public MultiDeducerPuzzleGenerator(Deducer[] deducers) {
+        this(deducers, false);
     }
     
     @Override
     public Puzzle generate(ImmutableBoard solvedBoard) {
         Set<Position> candidates = new HashSet<>(PositionLists.all());
         MutableBoard board = solvedBoard.createMutableCopy();
-        while (step(board, candidates));
-        return new Puzzle(solvedBoard, board.createImmutableCopy());
+        int hardness = 0;
+        int stepHardness = step(board, candidates);
+        while (stepHardness >= 0) {
+            hardness = Math.max(hardness, stepHardness);
+            stepHardness = step(board, candidates);
+        }
+        Puzzle puzzle = new Puzzle(solvedBoard, board.createImmutableCopy());
+        puzzle.getMetadata().hardness = hardness;
+        return puzzle;
     }
     
-    private boolean step(MutableBoard board, Set<Position> candidates) {
+    private int step(MutableBoard board, Set<Position> candidates) {
         List<List<Position>> canHide = new ArrayList<>();
         for (int i = 0; i < deducers.length; i++) {
             canHide.add(new ArrayList<>());
@@ -57,35 +69,41 @@ public class MultiDeducerPuzzleGenerator extends PuzzleGenerator {
                 } else {
                     i++;
                     if (i == deducers.length) {
-                        System.out.println(String.format(
-                                "#%s (%s, %s): not deducible",
-                                candidates.size(),
-                                p.getRow(),
-                                p.getCol()));
+                        if (verbose) {
+                            System.out.println(String.format(
+                                    "#%s (%s, %s): not deducible",
+                                    candidates.size(),
+                                    p.getRow(),
+                                    p.getCol()));
+                        }
                         it.remove(); // because now not deducible
                         break;
                     }
                 }
             }
         }
-        System.out.println("    canHide size: "
-                + canHide.stream().map(l -> l.size()).collect(Collectors.toList()));
+        if (verbose) {
+            System.out.println("    canHide size: "
+                    + canHide.stream().map(l -> l.size()).collect(Collectors.toList()));
+        }
         for (int i = deducers.length - 1; i >= 0; i--) {
             if (canHide.get(i).size() > 0) {
                 Position p = SudokuUtil.randomElement(canHide.get(i));
-                System.out.println(String.format(
-                        "#%s (%s, %s): hide by deducer #%s %s",
-                        candidates.size(),
-                        p.getRow(),
-                        p.getCol(),
-                        i,
-                        "")); // deducers[i].getClass().getSimpleName()));
+                if (verbose) {
+                    System.out.println(String.format(
+                            "#%s (%s, %s): hide by deducer #%s %s",
+                            candidates.size(),
+                            p.getRow(),
+                            p.getCol(),
+                            i,
+                            "")); // deducers[i].getClass().getSimpleName()));
+                }
                 candidates.remove(p); // because now hidden
                 board.hideSquare(p);
-                return true;
+                return i;
             }
         }
-        return false;
+        return -1;
     }
     
 }
