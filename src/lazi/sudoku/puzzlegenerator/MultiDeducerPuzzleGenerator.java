@@ -34,13 +34,16 @@ public class MultiDeducerPuzzleGenerator extends PuzzleGenerator {
         Set<Position> candidates = new HashSet<>(PositionLists.all());
         MutableBoard board = solvedBoard.createMutableCopy();
         int hardness = 0;
+        int[] hardnessArray = new int[deducers.length];
         int stepHardness = step(board, candidates);
         while (stepHardness >= 0) {
             hardness = Math.max(hardness, stepHardness);
+            hardnessArray[stepHardness]++;
             stepHardness = step(board, candidates);
         }
         Puzzle puzzle = new Puzzle(solvedBoard, board.createImmutableCopy());
         puzzle.getMetadata().hardness = hardness;
+        puzzle.getMetadata().hardnessArray = hardnessArray;
         return puzzle;
     }
     

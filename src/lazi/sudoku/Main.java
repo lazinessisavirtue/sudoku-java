@@ -1,5 +1,7 @@
 package lazi.sudoku;
 
+import java.util.Arrays;
+
 import lazi.sudoku.board.ImmutableBoard;
 import lazi.sudoku.boardgenerator.BoardGenerator;
 import lazi.sudoku.boardgenerator.L1BoardGenerator;
@@ -23,7 +25,7 @@ import lazi.sudoku.puzzlegenerator.MultiDeducerPuzzleGenerator;
 /*
     References:
     - http://www.sudokuwiki.org/strategy_families
-    - https://www.stolaf.edu//people/hansonr/sudoku/analyst.htm
+    - https://www.stolaf.edu/people/hansonr/sudoku/analyst.htm
 */
 public class Main {
     
@@ -142,7 +144,21 @@ public class Main {
                 .mapToInt(p -> puzzle.getPuzzleBoard().getSquare(p).containsExactlyOne() ? 1 : 0)
                 .sum());
         System.out.println("  hardness: " + puzzle.getMetadata().hardness);
+        System.out.println("  hardnessArray: " + Arrays.toString(puzzle.getMetadata().hardnessArray));
         return puzzle;
+    }
+    
+    private static boolean isHardEnough(Puzzle puzzle) {
+        //return puzzle.getMetadata().hardness >= 14;
+        int summary = 0;
+        for (int i = 6; i < puzzle.getMetadata().hardnessArray.length; i++) {
+            summary += puzzle.getMetadata().hardnessArray[i];
+        }
+        for (int i = 14; i < puzzle.getMetadata().hardnessArray.length; i++) {
+            summary += puzzle.getMetadata().hardnessArray[i];
+        }
+        System.out.println("  hardnessArray.summary: " + summary);
+        return summary >= 8;
     }
     
     public static Puzzle generateHardPuzzle() {
@@ -150,7 +166,7 @@ public class Main {
         
         Puzzle puzzle = tryGenerateHardPuzzle();
         int attempt = 1;
-        while (puzzle.getMetadata().hardness < 14) {
+        while (!isHardEnough(puzzle)) {
             puzzle = tryGenerateHardPuzzle();
             attempt++;
         }
